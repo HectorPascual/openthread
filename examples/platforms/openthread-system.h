@@ -54,6 +54,10 @@ extern "C" {
 void otSysInit(int argc, char *argv[]);
 
 /**
+ * LEDS
+ */
+
+/**
  * This function performs all platform-specific deinitialization for OpenThread's drivers.
  *
  * @note This function is not called by the OpenThread library. Instead, the system/RTOS should call this function

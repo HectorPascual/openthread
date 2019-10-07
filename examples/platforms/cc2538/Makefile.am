@@ -41,6 +41,12 @@ PLATFORM_SOURCES                          = \
     cc2538-reg.h                            \
     diag.c                                  \
     entropy.c                               \
+    gpio.h                                  \
+    gpio.c                                  \
+    leds.h                                  \
+    leds.c                                  \
+    button.h                                \
+    button.c                                \
     flash.c                                 \
     misc.c                                  \
     openthread-core-cc2538-config.h         \

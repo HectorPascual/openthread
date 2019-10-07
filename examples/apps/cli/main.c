@@ -29,13 +29,15 @@
 #include <assert.h>
 #include <openthread-core-config.h>
 #include <openthread/config.h>
-
 #include <openthread/cli.h>
 #include <openthread/diag.h>
 #include <openthread/tasklet.h>
 #include <openthread/platform/logging.h>
 
+
 #include "openthread-system.h"
+#include "cc2538/leds.h"
+#include "cc2538/button.h"
 
 #if OPENTHREAD_EXAMPLES_POSIX
 #include <setjmp.h>
@@ -103,11 +105,20 @@ pseudo_reset:
     assert(instance);
 
     otCliUartInit(instance);
-
+    otPlatformLedsInit();
+    init_button();
     while (!otSysPseudoResetWasRequested())
     {
         otTaskletsProcess(instance);
         otSysProcessDrivers(instance);
+        if(!read_button()){
+            otCliOutputFormat("LED ON!\r\n");
+            LED3_ON;
+        }
+        else{
+            otCliOutputFormat("LED OFF!\r\n");
+            LED3_OFF;
+        }
     }
 
     otInstanceFinalize(instance);

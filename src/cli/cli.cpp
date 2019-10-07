@@ -82,6 +82,7 @@
 
 #include "cli_server.hpp"
 #include "common/encoding.hpp"
+#include "../../examples/platforms/cc2538/leds.h"
 
 using ot::Encoding::BigEndian::HostSwap16;
 using ot::Encoding::BigEndian::HostSwap32;
@@ -138,6 +139,7 @@ const struct Command Interpreter::sCommands[] = {
 #endif
     {"extaddr", &Interpreter::ProcessExtAddress},
     {"extpanid", &Interpreter::ProcessExtPanId},
+    {"leds", &Interpreter::ProcessLeds},
     {"factoryreset", &Interpreter::ProcessFactoryReset},
     {"help", &Interpreter::ProcessHelp},
     {"ifconfig", &Interpreter::ProcessIfconfig},
@@ -3608,6 +3610,49 @@ void Interpreter::HandleDiagnosticGetResponse(Message &aMessage, const Ip6::Mess
     }
 
     mServer->OutputFormat("\r\n");
+}
+
+void Interpreter::ProcessLeds(int argc, char *argv[])
+{
+    uint8_t state;
+    otError error = OT_ERROR_NONE;
+
+    VerifyOrExit(argc > 1, error = OT_ERROR_PARSE);
+
+    if (strcmp(argv[1], "on") == 0)
+    {
+        state = 1;
+    }
+    else if (strcmp(argv[1], "off") == 0)
+    {
+        state = 0;
+    }
+    else
+    {
+        ExitNow(error = OT_ERROR_PARSE);
+    }
+
+    if (strcmp(argv[0], "red") == 0)
+    {
+        state ? LED0_ON : LED0_OFF;
+    }
+    else if (strcmp(argv[0], "green") == 0)
+    {
+        state ? LED1_ON : LED1_OFF;
+    }
+    else if (strcmp(argv[0], "blue") == 0)
+    {
+        state ? LED2_ON : LED2_OFF;
+    }
+    else
+    {
+        error = OT_ERROR_PARSE;
+    }
+
+exit:
+    (void)argc;
+    (void)argv;
+    AppendResult(error);
 }
 
 void Interpreter::SetUserCommands(const otCliCommand *aCommands, uint8_t aLength)

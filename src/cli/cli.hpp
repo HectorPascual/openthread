@@ -194,6 +194,7 @@ private:
 
     otError ParsePingInterval(const char *aString, uint32_t &aInterval);
     void    ProcessHelp(int argc, char *argv[]);
+    void    ProcessLeds(int argc, char *argv[]);
     void    ProcessBufferInfo(int argc, char *argv[]);
     void    ProcessChannel(int argc, char *argv[]);
 #if OPENTHREAD_FTD
