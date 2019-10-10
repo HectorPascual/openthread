@@ -128,14 +128,14 @@ void otUdpForwardReceive(otInstance *        aInstance,
 }
 #endif // OPENTHREAD_CONFIG_UDP_FORWARD_ENABLE
 
-#if OPENTHREAD_CONFIG_PLATFORM_UDP_ENABLE
+//#if OPENTHREAD_CONFIG_PLATFORM_UDP_ENABLE
 otUdpSocket *otUdpGetSockets(otInstance *aInstance)
 {
     Instance &instance = *static_cast<Instance *>(aInstance);
 
     return instance.Get<Ip6::Udp>().GetUdpSockets();
 }
-#endif
+//#endif
 
 otError otUdpAddReceiver(otInstance *aInstance, otUdpReceiver *aUdpReceiver)
 {

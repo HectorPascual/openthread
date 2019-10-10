@@ -328,9 +328,9 @@ public:
      */
     void UpdateChecksum(Message &aMessage, uint16_t aChecksum);
 
-#if OPENTHREAD_CONFIG_PLATFORM_UDP_ENABLE
+//#if OPENTHREAD_CONFIG_PLATFORM_UDP_ENABLE
     otUdpSocket *GetUdpSockets(void) { return mSockets; }
-#endif
+//#endif
 
 #if OPENTHREAD_CONFIG_UDP_FORWARD_ENABLE
     /**

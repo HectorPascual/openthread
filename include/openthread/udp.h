@@ -130,6 +130,18 @@ typedef struct otUdpSocket
     struct otUdpSocket *mNext;     ///< A pointer to the next UDP socket (internal use only).
 } otUdpSocket;
 
+
+/**
+ * This function gets the existing UDP Sockets.
+ *
+ * @param[in]  aInstance            A pointer to an OpenThread instance.
+ *
+ * @returns A pointer to the first UDP Socket.
+ *
+ */
+otUdpSocket *otUdpGetSockets(otInstance *aInstance);
+
+
 /**
  * Allocate a new message buffer for sending a UDP message.
  *
@@ -302,15 +314,6 @@ void otUdpForwardReceive(otInstance *        aInstance,
                          const otIp6Address *aPeerAddr,
                          uint16_t            aSockPort);
 
-/**
- * This function gets the existing UDP Sockets.
- *
- * @param[in]  aInstance            A pointer to an OpenThread instance.
- *
- * @returns A pointer to the first UDP Socket.
- *
- */
-otUdpSocket *otUdpGetSockets(otInstance *aInstance);
 
 /**
  * @}

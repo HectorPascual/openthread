@@ -33,11 +33,15 @@
 #include <openthread/diag.h>
 #include <openthread/tasklet.h>
 #include <openthread/platform/logging.h>
+#include <stdlib.h>
+#include <openthread/udp.h>
+#include <openthread/ip6.h>
 
 
 #include "openthread-system.h"
 #include "cc2538/leds.h"
 #include "cc2538/button.h"
+
 
 #if OPENTHREAD_EXAMPLES_POSIX
 #include <setjmp.h>
@@ -60,7 +64,7 @@ void otPlatFree(void *aPtr)
 }
 #endif
 
-void otTaskletsSignalPending(otInstance *aInstance)
+void otTaskletsSignalPeotInstancending(otInstance *aInstance)
 {
     OT_UNUSED_VARIABLE(aInstance);
 }
@@ -112,12 +116,34 @@ pseudo_reset:
         otTaskletsProcess(instance);
         otSysProcessDrivers(instance);
         if(!read_button()){
-            otCliOutputFormat("LED ON!\r\n");
+            //otNetifAddress *st_iplist;
+            //st_iplist = otIp6GetUnicastAddresses(instance);
+            //otMessageInfo st_message = { st_iplist -> mAddress , 4, TRUE};
+            //otUdpSendDatagram(instance, "hola", st_message);
+            //otCliOutputFormat("LED ON!\r\n");
+            char buffer_1[50];
+            char buffer_2[50];
+            int c;
+            otCliOutputFormat("HOST IP\n");
+            for (c = 0; c < 16; c++){
+                otCliOutputFormat(itoa((int)otIp6GetUnicastAddresses(instance)->mAddress.mFields.m8[c], buffer_1, 16));
+                if (c%2){
+                    otCliOutputFormat(":");
+                }            
+            }
+            otCliOutputFormat("PEER IP\n");
+            for (c = 0; c < 16; c++){
+                otCliOutputFormat(itoa((int)otUdpGetSockets(instance)->mPeerName.mAddress.mFields.m8[c], buffer_2, 16));
+                if (c%2){
+                    otCliOutputFormat(":");
+                }            
+            }
+            otCliOutputFormat("\n");
             LED3_ON;
         }
         else{
-            otCliOutputFormat("LED OFF!\r\n");
             LED3_OFF;
+            //otCliOutputFormat("LED OFF!\r\n");
         }
     }
 
