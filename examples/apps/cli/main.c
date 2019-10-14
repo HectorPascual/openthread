@@ -131,7 +131,7 @@ pseudo_reset:
                     otCliOutputFormat(":");
                 }            
             }
-            otCliOutputFormat("PEER IP\n");
+            otCliOutputFormat("\nPEER IP\n");
             for (c = 0; c < 16; c++){
                 otCliOutputFormat(itoa((int)otUdpGetSockets(instance)->mPeerName.mAddress.mFields.m8[c], buffer_2, 16));
                 if (c%2){
