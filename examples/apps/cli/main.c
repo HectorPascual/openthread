@@ -32,11 +32,13 @@
 #include <openthread/cli.h>
 #include <openthread/diag.h>
 #include <openthread/tasklet.h>
+#include <openthread/error.h>
 #include <openthread/platform/logging.h>
 #include <stdlib.h>
 #include <openthread/udp.h>
 #include <openthread/ip6.h>
-
+#include <openthread/message.h>
+#include <string.h>
 
 #include "openthread-system.h"
 #include "cc2538/leds.h"
@@ -111,6 +113,7 @@ pseudo_reset:
     otCliUartInit(instance);
     otPlatformLedsInit();
     init_button();
+    int check = 0;
     while (!otSysPseudoResetWasRequested())
     {
         otTaskletsProcess(instance);
@@ -123,6 +126,7 @@ pseudo_reset:
             //otCliOutputFormat("LED ON!\r\n");
             char buffer_1[50];
             char buffer_2[50];
+            otError error = OT_ERROR_NONE;
             int c;
             otCliOutputFormat("HOST IP\n");
             for (c = 0; c < 16; c++){
@@ -139,10 +143,34 @@ pseudo_reset:
                 }            
             }
             otCliOutputFormat("\n");
-            LED3_ON;
+            if (check == 0) {
+                const char *buf = "Hola";
+                otMessageInfo messageInfo;
+                otUdpSocket *socket;
+
+                socket = otUdpGetSockets(instance);
+                memset(&messageInfo, 0, sizeof(messageInfo));
+                messageInfo.mSockPort = socket->mSockName.mPort;
+                messageInfo.mPeerPort = socket->mPeerName.mPort;
+                messageInfo.mSockAddr = socket->mSockName.mAddress;
+                messageInfo.mPeerAddr = socket->mPeerName.mAddress;
+                //messageInfo.mInterfaceId = OT_NETIF_INTERFACE_ID_THREAD;
+
+                otMessage *msg = otUdpNewMessage(instance, NULL);
+                otCliOutputFormat(otThreadErrorToString(otMessageAppend(msg, buf, (uint16_t)strlen(buf))));
+
+                otUdpSend(socket, msg, &messageInfo);
+                if(error != OT_ERROR_NONE && msg != NULL)
+                {
+                    otMessageFree(msg);
+                    check = 1;
+                }
+
+            }
+            //LED3_ON;
         }
         else{
-            LED3_OFF;
+            //LED3_OFF;
             //otCliOutputFormat("LED OFF!\r\n");
         }
     }
