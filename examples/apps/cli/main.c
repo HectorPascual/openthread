@@ -42,6 +42,7 @@
 
 #include "openthread-system.h"
 #include "cc2538/leds.h"
+#include "cc2538/gpio.h"
 #include "cc2538/button.h"
 
 
@@ -69,6 +70,23 @@ void otPlatFree(void *aPtr)
 void otTaskletsSignalPeotInstancending(otInstance *aInstance)
 {
     OT_UNUSED_VARIABLE(aInstance);
+}
+
+void HandleUdpReceive(void *aContext, otMessage *aMessage, const otMessageInfo *aMessageInfo)
+{
+    (void)aContext;
+    (void)aMessageInfo;
+    char buf[100];
+    otMessageRead(aMessage, otMessageGetOffset(aMessage), buf, otMessageGetLength(aMessage));
+    if(cc2538GpioReadPin(GPIO_D_NUM, LED2_PIN)){
+        LED2_OFF;
+        otCliOutputFormat("led2 on");
+    }
+    else{
+        LED2_ON;
+        otCliOutputFormat("led2 off");
+    }
+    //otCliOutputFormat(buf);
 }
 
 int main(int argc, char *argv[])
@@ -109,21 +127,24 @@ pseudo_reset:
     instance = otInstanceInitSingle();
 #endif
     assert(instance);
-
+    otUdpSocket *socket;
     otCliUartInit(instance);
     otPlatformLedsInit();
     init_button();
-    int check = 0;
-    while (!otSysPseudoResetWasRequested())
-    {
+    while (!otSysPseudoResetWasRequested()) {
         otTaskletsProcess(instance);
         otSysProcessDrivers(instance);
+
+        
         if(!read_button()){
             //otNetifAddress *st_iplist;
             //st_iplist = otIp6GetUnicastAddresses(instance);
             //otMessageInfo st_message = { st_iplist -> mAddress , 4, TRUE};
             //otUdpSendDatagram(instance, "hola", st_message);
             //otCliOutputFormat("LED ON!\r\n");
+            socket = otUdpGetSockets(instance);
+            socket->mHandler = HandleUdpReceive;
+
             char buffer_1[50];
             char buffer_2[50];
             otError error = OT_ERROR_NONE;
@@ -143,37 +164,35 @@ pseudo_reset:
                 }            
             }
             otCliOutputFormat("\n");
-            if (check == 0) {
-                const char *buf = "Hola";
-                otMessageInfo messageInfo;
-                otUdpSocket *socket;
+            
+            const char *buf = "Hola";
+            otMessageInfo messageInfo;
+    
+            memset(&messageInfo, 0, sizeof(messageInfo));
+            messageInfo.mSockPort = socket->mSockName.mPort;
+            messageInfo.mPeerPort = socket->mPeerName.mPort;
+            messageInfo.mSockAddr = socket->mSockName.mAddress;
+            messageInfo.mPeerAddr = socket->mPeerName.mAddress;
+            //messageInfo.mInterfaceId = OT_NETIF_INTERFACE_ID_THREAD;
 
-                socket = otUdpGetSockets(instance);
-                memset(&messageInfo, 0, sizeof(messageInfo));
-                messageInfo.mSockPort = socket->mSockName.mPort;
-                messageInfo.mPeerPort = socket->mPeerName.mPort;
-                messageInfo.mSockAddr = socket->mSockName.mAddress;
-                messageInfo.mPeerAddr = socket->mPeerName.mAddress;
-                //messageInfo.mInterfaceId = OT_NETIF_INTERFACE_ID_THREAD;
+            otMessage *msg = otUdpNewMessage(instance, NULL);
+            otCliOutputFormat(otThreadErrorToString(otMessageAppend(msg, buf, (uint16_t)strlen(buf))));
 
-                otMessage *msg = otUdpNewMessage(instance, NULL);
-                otCliOutputFormat(otThreadErrorToString(otMessageAppend(msg, buf, (uint16_t)strlen(buf))));
+            error = otUdpSend(socket, msg, &messageInfo);
 
-                otUdpSend(socket, msg, &messageInfo);
-                if(error != OT_ERROR_NONE && msg != NULL)
-                {
-                    otMessageFree(msg);
-                    check = 1;
-                }
-
+            if(error != OT_ERROR_NONE && msg != NULL)
+            {
+                otMessageFree(msg);
             }
-            //LED3_ON;
         }
         else{
             //LED3_OFF;
             //otCliOutputFormat("LED OFF!\r\n");
         }
+
     }
+
+
 
     otInstanceFinalize(instance);
 #if OPENTHREAD_CONFIG_MULTIPLE_INSTANCE_ENABLE
