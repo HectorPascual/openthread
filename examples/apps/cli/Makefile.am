@@ -48,7 +48,7 @@ LIBTOOLFLAGS_COMMON                                                   += \
     $(NULL)
 
 SOURCES_COMMON                                                        += \
-    main.c                                                               \
+    main_coap.c                                                               \
     $(NULL)
 
 if OPENTHREAD_ENABLE_BUILTIN_MBEDTLS
