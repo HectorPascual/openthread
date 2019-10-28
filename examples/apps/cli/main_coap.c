@@ -40,12 +40,24 @@
 #include <openthread/coap.h>
 #include <openthread/message.h>
 #include <string.h>
+#include <time.h>
 
 #include "openthread-system.h"
 #include "cc2538/leds.h"
 #include "cc2538/gpio.h"
 #include "cc2538/button.h"
 
+/* Systick Register address, refer datasheet for more info */
+#define STCTRL      (*( ( volatile unsigned long *) 0xE000E010 ))
+#define STRELOAD    (*( ( volatile unsigned long *) 0xE000E014 ))
+#define STCURR      (*( ( volatile unsigned long *) 0xE000E018 ))  
+
+/*******STCTRL bits*******/
+#define SBIT_ENABLE     0
+#define SBIT_TICKINT    1
+#define SBIT_CLKSOURCE  2
+
+#define RELOAD_VALUE  1600000
 
 
 void CoapReqHandler(void *aContext, otMessage *aMessage, const otMessageInfo *aMessageInfo){
@@ -72,7 +84,7 @@ pseudo_reset:
     otPlatformLedsInit();
     init_button();
 
-    otCoapStart(instance,OT_DEFAULT_COAP_PORT);
+    /*otCoapStart(instance,OT_DEFAULT_COAP_PORT);
 
     const char *res_name = "test-res";
     const char *buf = "Hola";
@@ -93,15 +105,26 @@ pseudo_reset:
     resource.mContext = NULL;
     resource.mNext = NULL;
 
-    otCliOutputFormat(otThreadErrorToString(otCoapAddResource(instance, &resource)));
+    otCliOutputFormat(otThreadErrorToString(otCoapAddResource(instance, &resource)));*/
 
     while (!otSysPseudoResetWasRequested()) {
         otTaskletsProcess(instance);
         otSysProcessDrivers(instance);
 
         if (!read_button()){
+            otCliOutputFormat(":'(");
+            /*clock_t start_time = clock(); 
+             // looping till required time is not acheived 
+            while (clock() < start_time + 10000) {
+                otCliOutputFormat("waiting");
+            }*/             
 
-            socket = otUdpGetSockets(instance);
+            STRELOAD = RELOAD_VALUE;    // Reload value for 1ms tick
+
+            /* Enable the Systick, Systick Interrup and select CPU Clock Source */
+            STCTRL = (1<<SBIT_ENABLE) | (1<<SBIT_CLKSOURCE);
+            while(STCURR);
+            /*socket = otUdpGetSockets(instance);
             
             coapCode = OT_COAP_CODE_PUT;
             coapType = OT_COAP_TYPE_CONFIRMABLE;    
@@ -115,7 +138,7 @@ pseudo_reset:
             otCoapMessageGenerateToken(msg, OT_COAP_MAX_TOKEN_LENGTH);
             otCliOutputFormat(otThreadErrorToString(otCoapMessageAppendUriPathOptions(msg, resource.mUriPath)));
             otCliOutputFormat(otThreadErrorToString(otCoapMessageSetPayloadMarker(msg)));
-            otCliOutputFormat(otThreadErrorToString(otCoapSendRequest(instance, msg, &messageInfo, NULL,NULL)));
+            otCliOutputFormat(otThreadErrorToString(otCoapSendRequest(instance, msg, &messageInfo, NULL,NULL)));*/
         }
 
     }
@@ -128,3 +151,4 @@ pseudo_reset:
 
     return 0;
 }
+
