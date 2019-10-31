@@ -84,7 +84,7 @@ pseudo_reset:
     otPlatformLedsInit();
     init_button();
 
-    /*otCoapStart(instance,OT_DEFAULT_COAP_PORT);
+    otCoapStart(instance,OT_DEFAULT_COAP_PORT);
 
     const char *res_name = "test-res";
     const char *buf = "Hola";
@@ -105,24 +105,13 @@ pseudo_reset:
     resource.mContext = NULL;
     resource.mNext = NULL;
 
-    otCliOutputFormat(otThreadErrorToString(otCoapAddResource(instance, &resource)));*/
-    uint8_t c = 0;
+    otCliOutputFormat(otThreadErrorToString(otCoapAddResource(instance, &resource)));
     while (!otSysPseudoResetWasRequested()) {
         otTaskletsProcess(instance);
         otSysProcessDrivers(instance);
 
         if (!read_button()){
-            c++;
-            otCliOutputFormat("%d", c);
-            delay_ms(80);
-            /*clock_t start_time = clock(); 
-             // looping till required time is not acheived 
-            while (clock() < start_time + 10000) {
-                otCliOutputFormat("waiting");
-            }*/             
-
-
-            /*socket = otUdpGetSockets(instance);
+            socket = otUdpGetSockets(instance);
             
             coapCode = OT_COAP_CODE_PUT;
             coapType = OT_COAP_TYPE_CONFIRMABLE;    
@@ -132,11 +121,12 @@ pseudo_reset:
 
             msg = otCoapNewMessage(instance, NULL);
             otCoapMessageInit(msg, coapType, coapCode);
-            otCliOutputFormat(otThreadErrorToString(otMessageAppend(msg, buf, (uint16_t)strlen(buf))));
             otCoapMessageGenerateToken(msg, OT_COAP_MAX_TOKEN_LENGTH);
             otCliOutputFormat(otThreadErrorToString(otCoapMessageAppendUriPathOptions(msg, resource.mUriPath)));
+            otCliOutputFormat(otThreadErrorToString(otMessageAppend(msg, buf, (uint16_t)strlen(buf))));
             otCliOutputFormat(otThreadErrorToString(otCoapMessageSetPayloadMarker(msg)));
-            otCliOutputFormat(otThreadErrorToString(otCoapSendRequest(instance, msg, &messageInfo, NULL,NULL)));*/
+            otCliOutputFormat(otThreadErrorToString(otCoapSendRequest(instance, msg, &messageInfo, NULL,NULL)));
+            delay_ms(80);
         }
 
     }

@@ -673,7 +673,8 @@ void otCoapRemoveResource(otInstance *aInstance, otCoapResource *aResource);
  * This function sets the default handler for unhandled CoAP requests.
  *
  * @param[in]  aInstance  A pointer to an OpenThread instance.
- * @param[in]  aHandler   A function pointer that shall be called when an unhandled request arrives.
+ * @param[in]  aHandler   A function KeyboardInterrupt
+pointer that shall be called when an unhandled request arrives.
  * @param[in]  aContext   A pointer to arbitrary context information. May be NULL if not used.
  *
  */
