@@ -91,19 +91,23 @@ pseudo_reset:
     otCoapResource resource;
     memset(&resource, 0, sizeof(resource));
 
-    otUdpSocket *socket;
+    //otUdpSocket *socket;
 
     otMessageInfo messageInfo;
     memset(&messageInfo, 0, sizeof(messageInfo));
     otCoapCode   coapCode;
     otMessage *msg;
     otCoapType   coapType;
-
+    otError error = OT_ERROR_NONE;
 
     resource.mUriPath = res_name;
     resource.mHandler = CoapReqHandler;
     resource.mContext = NULL;
     resource.mNext = NULL;
+
+    otIp6Address ipAddress;
+    memset(&ipAddress, 0, sizeof(ipAddress));
+    otIp6AddressFromString("dead:dead:cafe:cafe:dead:dead:cafe:0001", &ipAddress);
 
     otCliOutputFormat(otThreadErrorToString(otCoapAddResource(instance, &resource)));
     while (!otSysPseudoResetWasRequested()) {
@@ -111,13 +115,15 @@ pseudo_reset:
         otSysProcessDrivers(instance);
 
         if (!read_button()){
-            socket = otUdpGetSockets(instance);
+//            socket = otUdpGetSockets(instance);
             
             coapCode = OT_COAP_CODE_PUT;
-            coapType = OT_COAP_TYPE_CONFIRMABLE;    
-    
+            coapType = OT_COAP_TYPE_NON_CONFIRMABLE;    
+            
+
             messageInfo.mPeerPort = OT_DEFAULT_COAP_PORT;
-            messageInfo.mPeerAddr = socket->mPeerName.mAddress;
+            messageInfo.mPeerAddr = ipAddress;
+
 
             msg = otCoapNewMessage(instance, NULL);
             otCoapMessageInit(msg, coapType, coapCode);
@@ -125,7 +131,12 @@ pseudo_reset:
             otCliOutputFormat(otThreadErrorToString(otCoapMessageAppendUriPathOptions(msg, resource.mUriPath)));
             otCliOutputFormat(otThreadErrorToString(otMessageAppend(msg, buf, (uint16_t)strlen(buf))));
             otCliOutputFormat(otThreadErrorToString(otCoapMessageSetPayloadMarker(msg)));
-            otCliOutputFormat(otThreadErrorToString(otCoapSendRequest(instance, msg, &messageInfo, NULL,NULL)));
+            error = otCoapSendRequest(instance, msg, &messageInfo, NULL,NULL);
+            if(error != OT_ERROR_NONE && msg != NULL)
+            {
+                otCliOutputFormat("send-error");
+                otMessageFree(msg);
+            }
             delay_ms(80);
         }
 
