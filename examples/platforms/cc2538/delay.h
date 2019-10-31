@@ -18,7 +18,7 @@
 #define SBIT_CLKSOURCE  2
 
 // http://www.ti.com/lit/ug/swru319c/swru319c.pdf - Clock operating at 32MHz
-#define CLOCK_FREQ 16000000
+#define CLOCK_FREQ 32000000
 
 
 void delay_us(uint8_t us);
