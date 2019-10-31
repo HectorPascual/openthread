@@ -43,6 +43,8 @@ PLATFORM_SOURCES                          = \
     entropy.c                               \
     gpio.h                                  \
     gpio.c                                  \
+    delay.h                                 \
+    delay.c                                 \
     leds.h                                  \
     leds.c                                  \
     button.h                                \

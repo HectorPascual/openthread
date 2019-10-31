@@ -43,11 +43,11 @@
 #include <time.h>
 
 #include "openthread-system.h"
+#include "cc2538/delay.h"
 #include "cc2538/leds.h"
 #include "cc2538/gpio.h"
 #include "cc2538/button.h"
 
-/* Systick Register address, refer datasheet for more info */
 #define STCTRL      (*( ( volatile unsigned long *) 0xE000E010 ))
 #define STRELOAD    (*( ( volatile unsigned long *) 0xE000E014 ))
 #define STCURR      (*( ( volatile unsigned long *) 0xE000E018 ))  
@@ -106,24 +106,22 @@ pseudo_reset:
     resource.mNext = NULL;
 
     otCliOutputFormat(otThreadErrorToString(otCoapAddResource(instance, &resource)));*/
-
+    uint8_t c = 0;
     while (!otSysPseudoResetWasRequested()) {
         otTaskletsProcess(instance);
         otSysProcessDrivers(instance);
 
         if (!read_button()){
-            otCliOutputFormat(":'(");
+            c++;
+            otCliOutputFormat("%d", c);
+            delay_ms(80);
             /*clock_t start_time = clock(); 
              // looping till required time is not acheived 
             while (clock() < start_time + 10000) {
                 otCliOutputFormat("waiting");
             }*/             
 
-            STRELOAD = RELOAD_VALUE;    // Reload value for 1ms tick
 
-            /* Enable the Systick, Systick Interrup and select CPU Clock Source */
-            STCTRL = (1<<SBIT_ENABLE) | (1<<SBIT_CLKSOURCE);
-            while(STCURR);
             /*socket = otUdpGetSockets(instance);
             
             coapCode = OT_COAP_CODE_PUT;
