@@ -64,8 +64,8 @@ void CoapReqHandler(void *aContext, otMessage *aMessage, const otMessageInfo *aM
     (void)aContext;
     (void)aMessageInfo;
     char buf[100];
-    otMessageRead(aMessage, otMessageGetOffset(aMessage), buf, otMessageGetLength(aMessage));
     otCliOutputFormat("ok");
+    otMessageRead(aMessage, otMessageGetOffset(aMessage), buf, otMessageGetLength(aMessage));
     otCliOutputFormat(buf);
 }
 
@@ -94,7 +94,6 @@ pseudo_reset:
     //otUdpSocket *socket;
 
     otMessageInfo messageInfo;
-    memset(&messageInfo, 0, sizeof(messageInfo));
     otCoapCode   coapCode;
     otMessage *msg;
     otCoapType   coapType;
@@ -120,17 +119,17 @@ pseudo_reset:
             coapCode = OT_COAP_CODE_PUT;
             coapType = OT_COAP_TYPE_NON_CONFIRMABLE;    
             
-
+            memset(&messageInfo, 0, sizeof(messageInfo));
             messageInfo.mPeerPort = OT_DEFAULT_COAP_PORT;
             messageInfo.mPeerAddr = ipAddress;
 
 
             msg = otCoapNewMessage(instance, NULL);
             otCoapMessageInit(msg, coapType, coapCode);
-            otCoapMessageGenerateToken(msg, OT_COAP_MAX_TOKEN_LENGTH);
+            otCoapMessageGenerateToken(msg, 2);
             otCliOutputFormat(otThreadErrorToString(otCoapMessageAppendUriPathOptions(msg, resource.mUriPath)));
-            otCliOutputFormat(otThreadErrorToString(otMessageAppend(msg, buf, (uint16_t)strlen(buf))));
             otCliOutputFormat(otThreadErrorToString(otCoapMessageSetPayloadMarker(msg)));
+            otCliOutputFormat(otThreadErrorToString(otMessageAppend(msg, buf, (uint16_t)strlen(buf))));
             error = otCoapSendRequest(instance, msg, &messageInfo, NULL,NULL);
             if(error != OT_ERROR_NONE && msg != NULL)
             {
